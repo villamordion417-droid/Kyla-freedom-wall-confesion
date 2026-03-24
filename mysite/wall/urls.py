@@ -1,15 +1,15 @@
 from django.urls import path
+from django.contrib import admin
+from django.contrib.auth.models import User # Add this
 
-from . import views
+# This tiny function creates the admin automatically
+def create_admin():
+    if not User.objects.filter(username='admin').exists():
+        User.objects.create_superuser('admin', 'admin@example.com', 'yourpassword123')
 
-app_name = 'wall'
+create_admin() # Run it immediately
 
 urlpatterns = [
-    path('', views.landing_view, name='landing'),
-    path('login/', views.login_view, name='login'),
-    path('signup/', views.signup_view, name='signup'),
-    path('logout/', views.logout_view, name='logout'),
-    path('upload/', views.upload_view, name='upload'),
-    path('wall/', views.wall_view, name='wall'),
-    path('api/light_candle/<int:post_id>/', views.light_candle, name='light_candle'),
+    path('admin/', admin.site.urls),
+    # ... keep your other paths here ...
 ]
