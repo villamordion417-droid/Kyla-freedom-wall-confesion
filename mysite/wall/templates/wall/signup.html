@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Signup - Freedom Wall</title>
+</head>
+<body class="min-h-screen bg-slate-950 text-white">
+  <div class="flex min-h-screen items-center justify-center p-6">
+    <div class="w-full max-w-md rounded-xl border border-indigo-700 bg-slate-900/90 p-8 shadow-2xl">
+      <h2 class="text-3xl font-bold text-center">Sign up</h2>
+      <form method="post" class="mt-6 space-y-4">{% csrf_token %}
+        {% if form.non_field_errors %}
+          <p class="rounded bg-rose-900 px-3 py-2 text-sm text-rose-200">{{ form.non_field_errors }}</p>
+        {% endif %}
+        <div>
+          {{ form.username.label_tag }}
+          {{ form.username }}
+          {% for error in form.username.errors %}<p class="text-rose-300">{{ error }}</p>{% endfor %}
+        </div>
+        <div>
+          {{ form.password1.label_tag }}
+          {{ form.password1 }}
+          {% for error in form.password1.errors %}<p class="text-rose-300">{{ error }}</p>{% endfor %}
+        </div>
+        <div>
+          {{ form.password2.label_tag }}
+          {{ form.password2 }}
+          {% for error in form.password2.errors %}<p class="text-rose-300">{{ error }}</p>{% endfor %}
+        </div>
+        <button type="submit" class="w-full rounded-lg bg-indigo-600 px-4 py-2 font-bold hover:bg-indigo-500">Sign Up</button>
+      </form>
+      <p class="mt-4 text-center text-slate-400">Already registered? <a href="/login/" class="text-indigo-400 hover:text-indigo-200">Log in</a></p>
+    </div>
+  </div>
+</body>
+</html>

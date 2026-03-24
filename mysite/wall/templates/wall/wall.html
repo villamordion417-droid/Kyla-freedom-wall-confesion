@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>The Wall - Freedom Wall</title>
+  <style>
+    @keyframes candle-flicker {
+      0%, 100% { opacity: 1; text-shadow: 0 0 6px #f6ad55; }
+      50% { opacity: 0.7; text-shadow: 0 0 16px #f6ad55; }
+    }
+    .candle-lit {
+      animation: candle-flicker 1s infinite alternate;
+    }
+    .masonry { column-count: 1; column-gap: 1rem; }
+    @media (min-width: 768px) { .masonry { column-count: 2; } }
+    @media (min-width: 1024px) { .masonry { column-count: 3; } }
+    .masonry-item { display: inline-block; width: 100%; margin-bottom: 1rem; }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-slate-950 via-indigo-950 to-black text-white">
+  <div class="container mx-auto p-6">
+    <div class="mb-4 flex items-center justify-between">
+      <a href="/upload/" class="rounded bg-indigo-600 px-3 py-2 text-sm hover:bg-indigo-500">Post New Thought</a>
+      <a href="/logout/" class="rounded bg-rose-600 px-3 py-2 text-sm hover:bg-rose-500">Logout</a>
+    </div>
+
+    <section class="masonry">
+      {% for post in posts %}
+        <article class="masonry-item rounded-xl border border-indigo-600/40 bg-slate-900/70 p-4 shadow-2xl backdrop-blur-md">
+          <small class="text-xs text-slate-400">{{ post.created_at|date:'M d, Y H:i' }}{% if post.user %} · {{ post.user.username }} {% else %} · Anonymous{% endif %}</small>
+          <h3 class="mt-2 text-xl font-semibold text-white">{{ post.title|default:'Untitled Thought' }}</h3>
+          <p class="mt-2 text-slate-200">{{ post.content|linebreaksbr }}</p>
+          <div class="mt-4 flex items-center justify-between">
+            <span class="text-sm text-slate-300">Candles: <strong id="count-{{ post.id }}">{{ post.candle_count }}</strong></span>
+            <button class="light-candle inline-flex items-center space-x-1 rounded bg-amber-500 px-3 py-2 font-semibold text-slate-900 hover:bg-amber-400" data-post-id="{{ post.id }}">
+              <span class="candle-icon">🕯️</span> <span>Light a Candle</span>
+            </button>
+          </div>
+        </article>
+      {% empty %}
+        <p class="rounded-xl border border-indigo-600/40 bg-slate-900/70 p-6 text-center text-slate-300">No posts yet — be the first to share in the freedom sky.</p>
+      {% endfor %}
+    </section>
+  </div>
+
+  <script>
+    document.querySelectorAll('.light-candle').forEach(button => {
+      button.addEventListener('click', async () => {
+        const postId = button.dataset.postId;
+        button.disabled = true;
+        try {
+          const response = await fetch(`/api/light_candle/${postId}/`, {
+            method: 'POST',
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+              'X-CSRFToken': document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1] || ''
+            }
+          });
+          if (!response.ok) throw new Error('Network error');
+          const data = await response.json();
+          document.getElementById(`count-${postId}`).textContent = data.candle_count;
+          const icon = button.querySelector('.candle-icon');
+          icon.classList.add('candle-lit');
+          setTimeout(() => icon.classList.remove('candle-lit'), 1200);
+        } catch (e) {
+          console.error(e);
+        } finally {
+          button.disabled = false;
+        }
+      });
+    });
+  </script>
+</body>
+</html>
